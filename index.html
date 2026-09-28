@@ -21,8 +21,8 @@ h1{font-size:34px}h2{font-size:26px;margin-bottom:10px}h3{font-size:20px}
 .sec{flex:1;font:700 22px "Barlow Condensed",sans-serif;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--mute);cursor:pointer}
 .sec[aria-selected=true]{background:var(--court);border-color:var(--court);color:#fff}
 .tabs{display:flex;gap:4px;margin:14px 0;border-bottom:2px solid var(--line);overflow-x:auto}
-.tab{background:none;border:0;padding:10px 14px;font:600 16px Barlow,sans-serif;color:var(--mute);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px;white-space:nowrap}
-.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ball)}
+.tab,.mtab{background:none;border:0;padding:10px 14px;font:600 16px Barlow,sans-serif;color:var(--mute);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab[aria-selected=true],.mtab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ball)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--court);outline-offset:2px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .scroll{overflow-x:auto}
@@ -73,6 +73,7 @@ repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,rgba(0,0,0,.07) 1px 3
 repeating-linear-gradient(90deg,#8a5a2e 0 130px,#a06a36 130px 260px,#93602f 260px 390px,#a97539 390px 520px)}
 h1{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35);font-size:44px}
 .tabs{background:var(--card);border-radius:12px;padding:0 6px}
+.frm{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;max-width:400px;margin:12px 0;align-items:center}
 </style>
 </head>
 <body class="bg-padel">
@@ -120,7 +121,33 @@ h1{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35);font-size:44px}
   </main>
 
   <main id="mesa" class="hidden">
-    <div class="card soon"><h2>Juegos de mesa</h2><p class="note">Este apartado llegará después de la liga de pádel.</p></div>
+    <div class="tabs" role="tablist">
+      <button class="mtab" role="tab" data-mtab="mclas" aria-selected="true">Clasificación</button>
+      <button class="mtab" role="tab" data-mtab="mjue" aria-selected="false">Por juego</button>
+      <button class="mtab" role="tab" data-mtab="mest" aria-selected="false">Curiosidades</button>
+      <button class="mtab own" role="tab" data-mtab="mreg" aria-selected="false">Meter partida</button>
+      <button class="mtab" role="tab" data-mtab="mhist" aria-selected="false">Histórico</button>
+    </div>
+    <section id="mclas"><div class="card"><h2>Clasificación global</h2>
+      <div class="scroll"><table id="mtabla"></table></div>
+      <p class="note">Con peso 1 puntúan 1, 0,5, 0,25 y 0 por puesto (1º a 4º); con peso 0,5 se reparte la mitad. En un empate se reparten a partes iguales los puntos de los puestos que ocupan. Desempate: más primeros puestos y después menos partidas jugadas. El 🔥 aparece con 2 victorias seguidas o más.</p></div></section>
+    <section id="mjue" class="hidden"><div class="card"><h2>Clasificación por juego</h2>
+      <label for="mjuego">Juego</label> <select id="mjuego"></select>
+      <div class="scroll" style="margin-top:10px"><table id="mjtabla"></table></div></div>
+      <div class="card" id="mjinfo"></div></section>
+    <section id="mest" class="hidden"><div class="card" id="mestc"></div></section>
+    <section id="mreg" class="hidden"><div class="card"><h2>Nueva partida</h2>
+      <div class="frm">
+        <label for="mjuegoin">Juego</label><input id="mjuegoin" list="mjuegos" autocomplete="off"><datalist id="mjuegos"></datalist>
+        <label for="mpeso">Peso</label><select id="mpeso"><option value="1">1 · partida importante</option><option value="0.5">0,5 · partida ligera</option></select>
+        <label for="mfecha">Fecha</label><input type="date" id="mfecha">
+      </div>
+      <p class="note" style="margin:0 0 6px">Puesto de cada jugador. En un empate se pone el mismo puesto (dos primeros, y el siguiente es 3º).</p>
+      <div class="frm" id="mrows"></div>
+      <div class="err" id="merr" role="alert"></div>
+      <button class="btn" id="mguardar">Guardar partida</button></div></section>
+    <section id="mhist" class="hidden"><div class="card"><h2>Histórico de partidas</h2><div id="mlista"></div>
+      <p class="own" style="margin-top:14px"><button class="btn ghost danger" id="mdeshacer">Borrar última partida</button></p></div></section>
   </main>
   <p class="note" style="text-align:center;margin-top:28px"><a href="#" id="lnkEd" style="color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)">Acceso de editor</a></p>
   <div id="edBox" class="card hidden">
@@ -135,12 +162,19 @@ const P = ["Darío","Fran","Danis","DanRain"];
 const $ = id => document.getElementById(id);
 let matches = [];
 const API = {o: location.hostname.split(".")[0], r: location.pathname.split("/")[1] || ""};
-const FILE = "https://api.github.com/repos/"+API.o+"/"+API.r+"/contents/datos.json";
+const BASEURL = "https://api.github.com/repos/"+API.o+"/"+API.r+"/contents/";
 let token = ""; try{ token = localStorage.getItem("lp-token") || ""; }catch(e){}
 const hdr = raw => { const h={Accept: raw?"application/vnd.github.raw+json":"application/vnd.github+json"}; if(token) h.Authorization="Bearer "+token; return h; };
+let games = [], loaded = {};
+async function readFile(n){
+  try{ const r=await fetch(BASEURL+n+"?t="+Date.now(),{headers:hdr(true),cache:"no-store"});
+    if(r.ok){ loaded[n]=true; return await r.json(); }
+    if(r.status===404){ loaded[n]=true; return []; } }catch(e){}
+  try{ const r=await fetch(n+"?t="+Date.now(),{cache:"no-store"}); if(r.ok){ loaded[n]=true; return await r.json(); } }catch(e){}
+  loaded[n]=false; return [];
+}
 async function load(){
-  try{ const r=await fetch(FILE+"?t="+Date.now(),{headers:hdr(true),cache:"no-store"}); if(!r.ok) throw 0; matches=await r.json(); }
-  catch(e){ try{ const r=await fetch("datos.json?t="+Date.now(),{cache:"no-store"}); matches=await r.json(); }catch(x){ matches=[]; } }
+  matches = await readFile("datos.json"); games = await readFile("mesa.json");
   renderAll(); checkOwner();
 }
 async function checkOwner(){
@@ -151,16 +185,17 @@ async function checkOwner(){
   return false;
 }
 let busy=false;
-async function commit(){
+async function commit(n){
   if(!token) throw new Error("activa el acceso de editor");
+  if(!loaded[n]) throw new Error("los datos no se cargaron bien; recarga la página");
   if(busy) throw new Error("ya se está guardando");
   busy=true;
   try{
-    const g=await fetch(FILE,{headers:hdr(false),cache:"no-store"});
-    if(!g.ok) throw new Error("no se puede leer datos.json (código "+g.status+")");
-    const sha=(await g.json()).sha;
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(matches,null,1))));
-    const p=await fetch(FILE,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdr(false)),body:JSON.stringify({message:"Actualizar partidos",content:content,sha:sha})});
+    const g=await fetch(BASEURL+n,{headers:hdr(false),cache:"no-store"});
+    let sha; if(g.ok) sha=(await g.json()).sha; else if(g.status!==404) throw new Error("no se puede leer "+n+" (código "+g.status+")");
+    const data = n==="mesa.json" ? games : matches;
+    const body={message:"Actualizar "+n,content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,1))))}; if(sha) body.sha=sha;
+    const p=await fetch(BASEURL+n,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdr(false)),body:JSON.stringify(body)});
     if(!p.ok) throw new Error([401,403,404].includes(p.status)?"el token no vale o no tiene permiso":"error de GitHub ("+p.status+")");
   } finally { busy=false; }
 }
@@ -266,7 +301,7 @@ $("guardar").onclick = async ()=>{
   if(sets.length==3 && (w[0]==0||w[1]==0)) return err("Si un equipo gana los dos primeros sets no hay tercer set.");
   const fecha = $("fecha").value; if(!fecha) return err("Elige la fecha del partido.");
   matches.push({a:pr.a,b:pr.b,sets,fecha}); err(""); pairing=0;
-  try{ await commit(); renderAll(); show("clas"); }catch(e){ matches.pop(); err("No se ha podido guardar: " + (e && e.message || "inténtalo de nuevo.")); }
+  try{ await commit("datos.json"); renderAll(); show("clas"); }catch(e){ matches.pop(); err("No se ha podido guardar: " + (e && e.message || "inténtalo de nuevo.")); }
 };
 function err(t){ $("err").textContent=t; }
 
@@ -275,7 +310,7 @@ $("deshacer").onclick = async e=>{
   if(!matches.length) return;
   if(!armed){ armed=true; e.target.textContent="¿Seguro? Pulsa otra vez"; setTimeout(()=>{armed=false;e.target.textContent="Borrar último partido";},3500); return; }
   const last=matches.pop(); armed=false; e.target.textContent="Borrar último partido";
-  try{ await commit(); renderAll(); }catch(x){ matches.push(last); renderAll(); }
+  try{ await commit("datos.json"); renderAll(); }catch(x){ matches.push(last); renderAll(); }
 };
 
 function show(t){
@@ -290,7 +325,7 @@ document.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{
   $("padel").classList.toggle("hidden",b.dataset.sec!=="padel");
   $("mesa").classList.toggle("hidden",b.dataset.sec!=="mesa");
 });
-function renderAll(){ renderTabla(); renderProximo(); renderSets(); renderHist(); $("fecha").value=new Date().toISOString().slice(0,10); }
+function renderAll(){ renderTabla(); renderProximo(); renderSets(); renderHist(); $("fecha").value=new Date().toISOString().slice(0,10); renderMesa(); $("mfecha").value=new Date().toISOString().slice(0,10); }
 $("lnkEd").onclick=e=>{ e.preventDefault(); $("edBox").classList.toggle("hidden"); };
 $("tokOk").onclick=async()=>{
   token=$("tok").value.trim(); $("tok").value="";
@@ -299,6 +334,112 @@ $("tokOk").onclick=async()=>{
   else { token=""; try{ localStorage.removeItem("lp-token"); }catch(e){} $("tokMsg").textContent="Ese token no sirve para este repositorio."; }
 };
 $("tokOut").onclick=()=>{ token=""; try{ localStorage.removeItem("lp-token"); }catch(e){} document.body.classList.remove("owner"); $("tokMsg").textContent="Has salido del modo editor."; };
+const BASEP=[1,.5,.25,0];
+const fmt=n=>(Math.round(n*10000)/10000).toString().replace(".",",");
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const gkey=g=>g.juego.trim().toLowerCase();
+function calc(g){
+  const r=g.res.slice().sort((a,b)=>a.pos-b.pos), out=[]; let i=0;
+  while(i<r.length){ let j=i; while(j<r.length&&r[j].pos===r[i].pos) j++;
+    let sum=0; for(let k=i;k<j;k++) sum+=BASEP[k]||0;
+    for(let k=i;k<j;k++) out.push({p:r[k].p,pts:sum/(j-i)*g.peso,lugar:i});
+    i=j; }
+  return out;
+}
+function mstats(list){
+  const s={}; P.forEach((p,i)=>s[p]={p,i,pts:0,pj:0,l:[0,0,0,0],racha:0,mejor:0});
+  list.forEach(g=>calc(g).forEach(x=>{ const o=s[x.p]; o.pts+=x.pts; o.pj++; o.l[Math.min(x.lugar,3)]++;
+    if(x.lugar===0){o.racha++;o.mejor=Math.max(o.mejor,o.racha);} else o.racha=0; }));
+  return Object.values(s).sort((a,b)=>b.pts-a.pts||b.l[0]-a.l[0]||a.pj-b.pj||a.i-b.i);
+}
+function mtable(list,move){
+  const now=mstats(list), pp={};
+  if(move) mstats(list.slice(0,-1)).forEach((o,i)=>pp[o.p]=i);
+  let h='<tr><th></th>'+(move?'<th></th>':'')+'<th class="name">Jugador</th><th>Pts</th><th>PJ</th><th title="Primeros puestos">🥇</th><th>🥈</th><th>🥉</th><th>Media</th></tr>';
+  now.forEach((o,i)=>{
+    let mv=''; if(move){ mv='<span class="mv same">–</span>';
+      if(list.length>=2){ const d=pp[o.p]-i; if(d>0) mv='<span class="mv up">▲ '+d+'</span>'; else if(d<0) mv='<span class="mv down">▼ '+(-d)+'</span>'; }
+      mv='<td>'+mv+'</td>'; }
+    const fire=move&&o.racha>=2?'<span class="fire" title="Racha de '+o.racha+' victorias">🔥'+o.racha+'</span>':'';
+    h+='<tr class="'+(i==0?'first':'')+'"><td class="pos">'+(i+1)+'</td>'+mv+'<td class="name"><b>'+o.p+'</b>'+fire+'</td><td class="pts">'+fmt(o.pts)+'</td><td>'+o.pj+'</td><td>'+o.l[0]+'</td><td>'+o.l[1]+'</td><td>'+o.l[2]+'</td><td>'+(o.pj?fmt(o.pts/o.pj):"–")+'</td></tr>'; });
+  return h;
+}
+function playHtml(g){
+  const c=calc(g).sort((a,b)=>a.lugar-b.lugar);
+  return '<div class="match"><div class="meta">Partida '+(games.indexOf(g)+1)+' · '+fmtFecha(g.fecha)+' · peso '+fmt(g.peso)+'</div><div><b>'+esc(g.juego)+'</b></div><div>'+
+    c.map(x=>'<span class="'+(x.lugar==0?'win':'')+'">'+(x.lugar+1)+'º '+x.p+' (+'+fmt(x.pts)+')</span>').join(" · ")+'</div></div>';
+}
+function gameList(){
+  const n={}; games.forEach(g=>{ const k=gkey(g); n[k]=n[k]||{k,n:g.juego.trim(),c:0}; n[k].c++; });
+  return Object.values(n).sort((a,b)=>b.c-a.c||a.n.localeCompare(b.n));
+}
+function renderMesa(){
+  $("mtabla").innerHTML=mtable(games,true);
+  const gl=gameList(), sel=$("mjuego"), cur=sel.value;
+  sel.innerHTML=gl.length?gl.map(x=>'<option value="'+esc(x.k)+'">'+esc(x.n)+' ('+x.c+')</option>').join(""):'<option value="">Sin partidas todavía</option>';
+  if(cur&&gl.some(x=>x.k===cur)) sel.value=cur;
+  $("mjuegos").innerHTML=gl.map(x=>'<option value="'+esc(x.n)+'">').join("");
+  renderJuego(); renderMStats(gl);
+  $("mlista").innerHTML=games.length?[...games].reverse().map(playHtml).join(""):'<p class="note">Todavía no hay partidas registradas.</p>';
+}
+function renderJuego(){
+  const l=games.filter(g=>gkey(g)===$("mjuego").value);
+  if(!l.length){ $("mjtabla").innerHTML=""; $("mjinfo").innerHTML='<p class="note">Cuando haya partidas, aquí verás la clasificación de cada juego y su historial.</p>'; return; }
+  $("mjtabla").innerHTML=mtable(l,false);
+  const top=mstats(l)[0], pesos=[...new Set(l.map(g=>g.peso))].map(fmt).join(" y ");
+  $("mjinfo").innerHTML='<div class="grid3" style="margin-bottom:8px"><div class="kpi"><b>'+l.length+'</b>partidas jugadas</div><div class="kpi"><b>'+top.p+'</b>rey del juego ('+fmt(top.pts)+' pts)</div><div class="kpi"><b>'+pesos+'</b>peso usado</div><div class="kpi"><b>'+fmtFecha(l[l.length-1].fecha)+'</b>última partida</div></div>'+[...l].reverse().map(playHtml).join("");
+}
+$("mjuego").onchange=renderJuego;
+function renderMStats(gl){
+  const el=$("mestc");
+  if(!games.length){ el.innerHTML='<h2>Curiosidades</h2><p class="note">Aparecerán en cuanto haya partidas registradas.</p>'; return; }
+  const st=mstats(games), ties=games.filter(g=>new Set(g.res.map(r=>r.pos)).size<g.res.length).length;
+  const ult={}, h2h={}, best={}; P.forEach(a=>{ ult[a]=0; h2h[a]={}; P.forEach(b=>h2h[a][b]=0); });
+  let total=0;
+  games.forEach(g=>{ const c=calc(g), mx=Math.max(...c.map(x=>x.lugar));
+    c.forEach(x=>{ total+=x.pts; if(mx>0&&x.lugar===mx) ult[x.p]++;
+      c.forEach(y=>{ if(x.lugar<y.lugar) h2h[x.p][y.p]++; });
+      const k=x.p+"|"+gkey(g); best[k]=best[k]||{p:x.p,j:g.juego.trim(),n:0,b:0}; best[k].n++; best[k].b+=x.pts/g.peso; }); });
+  const rk=[...st].sort((a,b)=>b.mejor-a.mejor)[0], farol=P.slice().sort((a,b)=>ult[b]-ult[a])[0];
+  const eff=st.filter(o=>o.pj>0).sort((a,b)=>b.pts/b.pj-a.pts/a.pj)[0];
+  let h='<h2>Curiosidades</h2><div class="grid3"><div class="kpi"><b>'+games.length+'</b>partidas jugadas</div><div class="kpi"><b>'+gl.length+'</b>juegos distintos</div><div class="kpi"><b>'+esc(gl[0].n)+'</b>el más jugado ('+gl[0].c+')</div><div class="kpi"><b>'+fmt(total)+'</b>puntos repartidos</div><div class="kpi"><b>'+ties+'</b>partidas con empate</div>'+
+   '<div class="kpi"><b>🔥 '+rk.mejor+'</b>mayor racha de victorias: '+rk.p+'</div>'+
+   (ult[farol]>0?'<div class="kpi"><b>'+farol+'</b>farolillo rojo: último '+ult[farol]+' veces</div>':'')+
+   '<div class="kpi"><b>'+eff.p+'</b>más puntos por partida ('+fmt(eff.pts/eff.pj)+')</div></div>';
+  h+='<h3 style="margin-top:18px">Juegos</h3><div class="scroll"><table><tr><th class="name">Juego</th><th>Partidas</th><th>Rey</th></tr>'+
+   gl.map(x=>{ const l=games.filter(g=>gkey(g)===x.k); return '<tr><td class="name"><b>'+esc(x.n)+'</b></td><td>'+x.c+'</td><td>'+mstats(l)[0].p+'</td></tr>'; }).join("")+'</table></div>';
+  h+='<h3 style="margin-top:18px">Cara a cara</h3><div class="scroll"><table><tr><th></th>'+P.map(b=>'<th>'+b+'</th>').join("")+'</tr>'+
+   P.map(a=>'<tr><td class="name"><b>'+a+'</b></td>'+P.map(b=>'<td>'+(a===b?'–':h2h[a][b]+' – '+h2h[b][a])+'</td>').join("")+'</tr>').join("")+'</table></div><p class="note">Veces que quedó por delante el jugador de la fila – el de la columna, en partidas donde jugaron los dos.</p>';
+  const esp=P.map(p=>Object.values(best).filter(x=>x.p===p&&x.n>=2).sort((a,b)=>b.b/b.n-a.b/a.n)[0]).filter(Boolean);
+  if(esp.length) h+='<h3 style="margin-top:18px">Especialistas</h3>'+esp.map(x=>'<p style="margin:4px 0"><b>'+x.p+'</b> se defiende mejor en '+esc(x.j)+' ('+fmt(x.b/x.n)+' puntos base por partida en '+x.n+' partidas)</p>').join("")+'<p class="note">Solo cuentan juegos con al menos 2 partidas.</p>';
+  el.innerHTML=h;
+}
+$("mrows").innerHTML=P.map((p,i)=>'<label for="mp'+i+'">'+p+'</label><select id="mp'+i+'"><option value="">No juega</option><option value="1">1º</option><option value="2">2º</option><option value="3">3º</option><option value="4">4º</option></select>').join("");
+function merr(t){ $("merr").textContent=t; }
+$("mguardar").onclick=async()=>{
+  const juego=$("mjuegoin").value.trim(), peso=+$("mpeso").value, fecha=$("mfecha").value, res=[];
+  P.forEach((p,i)=>{ const v=$("mp"+i).value; if(v) res.push({p:p,pos:+v}); });
+  if(!juego) return merr("Escribe a qué juego habéis jugado.");
+  if(!fecha) return merr("Elige la fecha.");
+  if(res.length<2) return merr("Elige el puesto de al menos dos jugadores.");
+  if(!res.every(r=>r.pos===1+res.filter(x=>x.pos<r.pos).length)) return merr("Los puestos no cuadran: si hay dos primeros, el siguiente es el 3º.");
+  games.push({fecha:fecha,juego:juego,peso:peso,res:res}); merr("");
+  try{ await commit("mesa.json"); $("mjuegoin").value=""; P.forEach((p,i)=>$("mp"+i).value=""); renderAll(); mshow("mclas"); }
+  catch(e){ games.pop(); merr("No se ha podido guardar: "+(e&&e.message||"inténtalo de nuevo.")); }
+};
+let marmed=false;
+$("mdeshacer").onclick=async e=>{
+  if(!games.length) return;
+  if(!marmed){ marmed=true; e.target.textContent="¿Seguro? Pulsa otra vez"; setTimeout(()=>{marmed=false;e.target.textContent="Borrar última partida";},3500); return; }
+  const last=games.pop(); marmed=false; e.target.textContent="Borrar última partida";
+  try{ await commit("mesa.json"); renderAll(); }catch(x){ games.push(last); renderAll(); }
+};
+function mshow(t){
+  ["mclas","mjue","mest","mreg","mhist"].forEach(id=>$(id).classList.toggle("hidden",id!==t));
+  document.querySelectorAll(".mtab").forEach(b=>b.setAttribute("aria-selected",b.dataset.mtab===t));
+}
+document.querySelectorAll(".mtab").forEach(b=>b.onclick=()=>mshow(b.dataset.mtab));
+
 load();
 </script>
 </body>
