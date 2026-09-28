@@ -63,11 +63,21 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 .soon{text-align:center;padding:40px 16px}
 .hidden{display:none}
 .own{display:none}.owner .own{display:revert}
+
+body::before{content:"";position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center}
+body.bg-padel::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600' preserveAspectRatio='xMidYMid slice'%3E%3Crect width='400' height='600' fill='%231b46b8'/%3E%3Crect x='40' y='30' width='320' height='540' fill='%232f63dd'/%3E%3Cg fill='none' stroke='white' stroke-width='4' opacity='.8'%3E%3Crect x='40' y='30' width='320' height='540'/%3E%3Cline x1='40' y1='300' x2='360' y2='300' stroke-dasharray='10 8'/%3E%3Cline x1='40' y1='122' x2='360' y2='122'/%3E%3Cline x1='40' y1='478' x2='360' y2='478'/%3E%3Cline x1='200' y1='122' x2='200' y2='478'/%3E%3C/g%3E%3C/svg%3E")}
+@media (min-aspect-ratio:1/1){body.bg-padel::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400' preserveAspectRatio='xMidYMid slice'%3E%3Crect width='600' height='400' fill='%231b46b8'/%3E%3Crect x='30' y='40' width='540' height='320' fill='%232f63dd'/%3E%3Cg fill='none' stroke='white' stroke-width='4' opacity='.8'%3E%3Crect x='30' y='40' width='540' height='320'/%3E%3Cline x1='300' y1='40' x2='300' y2='360' stroke-dasharray='10 8'/%3E%3Cline x1='122' y1='40' x2='122' y2='360'/%3E%3Cline x1='478' y1='40' x2='478' y2='360'/%3E%3Cline x1='122' y1='200' x2='478' y2='200'/%3E%3C/g%3E%3C/svg%3E")}}
+body.bg-mesa::before{background-color:#8a5a2e;background-image:
+repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 2px,transparent 2px 130px),
+repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,rgba(0,0,0,.07) 1px 3px,transparent 3px 8px),
+repeating-linear-gradient(90deg,#8a5a2e 0 130px,#a06a36 130px 260px,#93602f 260px 390px,#a97539 390px 520px)}
+h1{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35);font-size:44px}
+.tabs{background:var(--card);border-radius:12px;padding:0 6px}
 </style>
 </head>
-<body>
+<body class="bg-padel">
 <div class="wrap">
-  <div class="top"><h1>Darío, Fran, Danis y DanRain</h1></div>
+  <div class="top"><h1>Hey!</h1></div>
   <div class="sections" role="tablist">
     <button class="sec" role="tab" data-sec="padel" aria-selected="true">🎾 Pádel</button>
     <button class="sec" role="tab" data-sec="mesa" aria-selected="false">🎲 Juegos de mesa</button>
@@ -112,7 +122,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
   <main id="mesa" class="hidden">
     <div class="card soon"><h2>Juegos de mesa</h2><p class="note">Este apartado llegará después de la liga de pádel.</p></div>
   </main>
-  <p class="note" style="text-align:center;margin-top:28px"><a href="#" id="lnkEd" style="color:var(--mute)">Acceso de editor</a></p>
+  <p class="note" style="text-align:center;margin-top:28px"><a href="#" id="lnkEd" style="color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)">Acceso de editor</a></p>
   <div id="edBox" class="card hidden">
     <label for="tok">Token de GitHub</label>
     <p style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><input id="tok" type="password" autocomplete="off" style="flex:1;min-width:200px"><button class="btn" id="tokOk">Activar</button><button class="btn ghost" id="tokOut">Salir</button></p>
@@ -275,6 +285,8 @@ function show(t){
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.tab));
 document.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".sec").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.body.classList.toggle("bg-padel",b.dataset.sec==="padel");
+  document.body.classList.toggle("bg-mesa",b.dataset.sec==="mesa");
   $("padel").classList.toggle("hidden",b.dataset.sec!=="padel");
   $("mesa").classList.toggle("hidden",b.dataset.sec!=="mesa");
 });
