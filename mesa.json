@@ -1,0 +1,25 @@
+[
+ {
+  "fecha": "2026-09-28",
+  "juego": "Pipeline",
+  "peso": 1,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 1
+   },
+   {
+    "p": "Fran",
+    "pos": 4
+   },
+   {
+    "p": "Danis",
+    "pos": 2
+   },
+   {
+    "p": "DanRain",
+    "pos": 3
+   }
+  ]
+ }
+]
