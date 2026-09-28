@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liga de pádel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f6fb;--card:#fff;--ink:#0f1b33;--mute:#5b6b88;--line:#dbe3f0;--court:#1f4fd8;--ball:#d6e800;--ballink:#2b3300;--up:#0f9d58;--down:#d93838;--soft:#eaf0fb}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1226;--card:#131d3a;--ink:#eef2fb;--mute:#93a3c4;--line:#24325a;--court:#5b86ff;--soft:#1a2749;--up:#3ddc84;--down:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0b1226;--card:#131d3a;--ink:#eef2fb;--mute:#93a3c4;--line:#24325a;--court:#5b86ff;--soft:#1a2749;--up:#3ddc84;--down:#ff6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Barlow,system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+h1,h2,h3{font-family:"Barlow Condensed",Impact,sans-serif;margin:0;line-height:1.05}
+h1{font-size:34px}h2{font-size:26px;margin-bottom:10px}h3{font-size:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:8px 0 14px}
+.sections{display:flex;gap:8px}
+.sec{flex:1;font:700 22px "Barlow Condensed",sans-serif;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--mute);cursor:pointer}
+.sec[aria-selected=true]{background:var(--court);border-color:var(--court);color:#fff}
+.tabs{display:flex;gap:4px;margin:14px 0;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;padding:10px 14px;font:600 16px Barlow,sans-serif;color:var(--mute);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ball)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--court);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{padding:9px 6px;text-align:center;border-bottom:1px solid var(--line)}
+th{font-weight:500;color:var(--mute);font-size:14px}
+td.name,th.name{text-align:left}
+.pos{font:700 30px "Barlow Condensed",sans-serif;width:44px}
+tr.first .pos{color:var(--court)}
+.pts{font:700 26px "Barlow Condensed",sans-serif}
+.mv{font-weight:700;font-size:14px;white-space:nowrap}
+.mv.up{color:var(--up)}.mv.down{color:var(--down)}.mv.same{color:var(--mute)}
+.fire{display:inline-flex;align-items:center;gap:2px;margin-left:8px;background:var(--ball);color:var(--ballink);border-radius:99px;padding:1px 8px 1px 5px;font-weight:700;font-size:14px}
+.court{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--court);color:#fff;border-radius:12px;padding:18px 12px;text-align:center}
+.court:before{content:"";position:absolute;left:50%;top:8px;bottom:8px;border-left:3px dashed rgba(255,255,255,.55)}
+.court .team{font:700 24px "Barlow Condensed",sans-serif;line-height:1.15}
+.court .vs{position:relative;z-index:1;background:var(--ball);color:var(--ballink);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-weight:700}
+.note{color:var(--mute);font-size:14px;margin:8px 0 0}
+label{font-weight:600;font-size:14px;color:var(--mute)}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.sets{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center;margin:14px 0;max-width:340px}
+.sets input{width:100%;text-align:center;font-size:20px}
+.sets .hd{font-size:13px;color:var(--mute);text-align:center}
+.btn{background:var(--ball);color:var(--ballink);border:0;border-radius:10px;padding:11px 18px;font:700 17px Barlow,sans-serif;cursor:pointer}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--mute);font-weight:600;font-size:14px;padding:7px 12px}
+.btn.danger{color:var(--down);border-color:var(--down)}
+.err{color:var(--down);font-weight:600;min-height:22px;margin:6px 0}
+.opt{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;color:var(--ink);font-size:16px;font-weight:500;cursor:pointer}
+.opt input{margin-right:8px}
+.match{padding:12px 0;border-bottom:1px solid var(--line)}
+.match:last-child{border-bottom:0}
+.match .meta{color:var(--mute);font-size:14px}
+.match .score{font:700 22px "Barlow Condensed",sans-serif;letter-spacing:.5px}
+.win{font-weight:700}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--soft);border-radius:12px;padding:12px}
+.kpi b{display:block;font:700 26px "Barlow Condensed",sans-serif}
+.soon{text-align:center;padding:40px 16px}
+.hidden{display:none}
+.own{display:none}.owner .own{display:revert}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Darío, Fran, Danis y DanRain</h1></div>
+  <div class="sections" role="tablist">
+    <button class="sec" role="tab" data-sec="padel" aria-selected="true">🎾 Pádel</button>
+    <button class="sec" role="tab" data-sec="mesa" aria-selected="false">🎲 Juegos de mesa</button>
+  </div>
+
+  <main id="padel">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="clas" aria-selected="true">Clasificación</button>
+      <button class="tab own" role="tab" data-tab="reg" aria-selected="false">Meter resultado</button>
+      <button class="tab" role="tab" data-tab="hist" aria-selected="false">Histórico</button>
+    </div>
+
+    <section id="clas">
+      <div class="card">
+        <h2>Clasificación</h2>
+        <div class="scroll"><table id="tabla"></table></div>
+        <p class="note">Cada jugador del equipo ganador suma 1 punto. Desempate: diferencia de sets y después de juegos. El 🔥 aparece con 2 victorias seguidas o más.</p>
+      </div>
+      <div class="card" id="curiosidades"></div>
+    </section>
+
+    <section id="reg" class="hidden">
+      <div class="card">
+        <h2>Próximo partido</h2>
+        <div id="proximo"></div>
+        <div class="sets" id="sets"></div>
+        <label for="fecha">Fecha</label> <input type="date" id="fecha">
+        <div class="err" id="err" role="alert"></div>
+        <button class="btn" id="guardar">Guardar resultado</button>
+      </div>
+    </section>
+
+    <section id="hist" class="hidden">
+      <div class="card">
+        <h2>Histórico de partidos</h2>
+        <div id="lista"></div>
+        <p class="own" style="margin-top:14px"><button class="btn ghost danger" id="deshacer">Borrar último partido</button></p>
+      </div>
+    </section>
+  </main>
+
+  <main id="mesa" class="hidden">
+    <div class="card soon"><h2>Juegos de mesa</h2><p class="note">Este apartado llegará después de la liga de pádel.</p></div>
+  </main>
+  <p class="note" style="text-align:center;margin-top:28px"><a href="#" id="lnkEd" style="color:var(--mute)">Acceso de editor</a></p>
+  <div id="edBox" class="card hidden">
+    <label for="tok">Token de GitHub</label>
+    <p style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><input id="tok" type="password" autocomplete="off" style="flex:1;min-width:200px"><button class="btn" id="tokOk">Activar</button><button class="btn ghost" id="tokOut">Salir</button></p>
+    <div class="note" id="tokMsg" role="status"></div>
+  </div>
+</div>
+
+<script>
+const P = ["Darío","Fran","Danis","DanRain"];
+const $ = id => document.getElementById(id);
+let matches = [];
+const API = {o: location.hostname.split(".")[0], r: location.pathname.split("/")[1] || ""};
+const FILE = "https://api.github.com/repos/"+API.o+"/"+API.r+"/contents/datos.json";
+let token = ""; try{ token = localStorage.getItem("lp-token") || ""; }catch(e){}
+const hdr = raw => { const h={Accept: raw?"application/vnd.github.raw+json":"application/vnd.github+json"}; if(token) h.Authorization="Bearer "+token; return h; };
+async function load(){
+  try{ const r=await fetch(FILE+"?t="+Date.now(),{headers:hdr(true),cache:"no-store"}); if(!r.ok) throw 0; matches=await r.json(); }
+  catch(e){ try{ const r=await fetch("datos.json?t="+Date.now(),{cache:"no-store"}); matches=await r.json(); }catch(x){ matches=[]; } }
+  renderAll(); checkOwner();
+}
+async function checkOwner(){
+  document.body.classList.remove("owner");
+  if(!token) return false;
+  try{ const r=await fetch("https://api.github.com/repos/"+API.o+"/"+API.r,{headers:hdr(false)}); const j=await r.json();
+    if(r.ok && j.permissions && j.permissions.push){ document.body.classList.add("owner"); return true; } }catch(e){}
+  return false;
+}
+let busy=false;
+async function commit(){
+  if(!token) throw new Error("activa el acceso de editor");
+  if(busy) throw new Error("ya se está guardando");
+  busy=true;
+  try{
+    const g=await fetch(FILE,{headers:hdr(false),cache:"no-store"});
+    if(!g.ok) throw new Error("no se puede leer datos.json (código "+g.status+")");
+    const sha=(await g.json()).sha;
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(matches,null,1))));
+    const p=await fetch(FILE,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdr(false)),body:JSON.stringify({message:"Actualizar partidos",content:content,sha:sha})});
+    if(!p.ok) throw new Error([401,403,404].includes(p.status)?"el token no vale o no tiene permiso":"error de GitHub ("+p.status+")");
+  } finally { busy=false; }
+}
+
+function setsWon(m){ let a=0,b=0; m.sets.forEach(s=>{ s[0]>s[1]?a++:b++; }); return [a,b]; }
+
+function stats(list){
+  const s = {};
+  P.forEach((p,i)=> s[p]={p,i,pts:0,pj:0,g:0,pe:0,sw:0,sl:0,gw:0,gl:0,racha:0,mejor:0});
+  list.forEach(m=>{
+    const [a,b]=setsWon(m), winA=a>b;
+    const ga=m.sets.reduce((x,t)=>x+t[0],0), gb=m.sets.reduce((x,t)=>x+t[1],0);
+    [[m.a,winA,a,b,ga,gb],[m.b,!winA,b,a,gb,ga]].forEach(([team,win,sf,sc,gf,gc])=>{
+      team.forEach(p=>{ const o=s[p]; o.pj++; o.sw+=sf; o.sl+=sc; o.gw+=gf; o.gl+=gc;
+        if(win){o.g++;o.pts++;o.racha++;o.mejor=Math.max(o.mejor,o.racha);} else {o.pe++;o.racha=0;} });
+    });
+  });
+  return Object.values(s).sort((x,y)=> y.pts-x.pts || (y.sw-y.sl)-(x.sw-x.sl) || (y.gw-y.gl)-(x.gw-x.gl) || x.i-y.i);
+}
+
+function renderTabla(){
+  const now = stats(matches), prev = stats(matches.slice(0,-1));
+  const prevPos = {}; prev.forEach((o,i)=>prevPos[o.p]=i);
+  let h = '<tr><th></th><th></th><th class="name">Jugador</th><th>Pts</th><th>PJ</th><th>G</th><th>P</th><th>Sets</th><th>Juegos</th><th>Mejor racha</th></tr>';
+  now.forEach((o,i)=>{
+    let mv = '<span class="mv same">–</span>';
+    if(matches.length>=2){
+      const d = prevPos[o.p]-i;
+      if(d>0) mv = `<span class="mv up" title="Sube">▲ ${d}</span>`;
+      else if(d<0) mv = `<span class="mv down" title="Baja">▼ ${-d}</span>`;
+    }
+    const fire = o.racha>=2 ? `<span class="fire" title="Racha de ${o.racha} victorias">🔥${o.racha}</span>` : '';
+    h += `<tr class="${i==0?'first':''}"><td class="pos">${i+1}</td><td>${mv}</td><td class="name"><b>${o.p}</b>${fire}</td>
+      <td class="pts">${o.pts}</td><td>${o.pj}</td><td>${o.g}</td><td>${o.pe}</td>
+      <td>${o.sw}-${o.sl}</td><td>${o.gw}-${o.gl}</td><td>${o.mejor}</td></tr>`;
+  });
+  $("tabla").innerHTML = h;
+
+  if(!matches.length){ $("curiosidades").innerHTML = '<h3>Aún no hay partidos</h3><p class="note">Ve a "Meter resultado" para registrar el primero.</p>'; return; }
+  const parejas = {};
+  matches.forEach(m=>{ const [a,b]=setsWon(m); [[m.a,a>b],[m.b,b>a]].forEach(([t,w])=>{ const k=[...t].sort().join(" + "); parejas[k]=parejas[k]||{k,pj:0,g:0}; parejas[k].pj++; if(w)parejas[k].g++; }); });
+  const mp = Object.values(parejas).sort((x,y)=>y.g/y.pj-x.g/x.pj||y.pj-x.pj)[0];
+  const rach = [...now].sort((x,y)=>y.mejor-x.mejor)[0];
+  const long = matches.filter(m=>m.sets.length==3).length;
+  $("curiosidades").innerHTML = `<h3>Datos curiosos</h3><div class="grid3" style="margin-top:10px">
+    <div class="kpi"><b>${matches.length}</b>partidos jugados</div>
+    <div class="kpi"><b>${mp.k}</b>mejor pareja (${mp.g}/${mp.pj} victorias)</div>
+    <div class="kpi"><b>🔥 ${rach.mejor}</b>mayor racha: ${rach.p}</div>
+    <div class="kpi"><b>${long}</b>partidos a 3 sets</div></div>`;
+}
+
+let pairing = 0;
+const PAIRINGS = [[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+function proposal(){
+  if(!matches.length){ const [a,b]=PAIRINGS[pairing]; return {a:a.map(i=>P[i]), b:b.map(i=>P[i])}; }
+  const t = stats(matches).map(o=>o.p);
+  return {a:[t[0],t[3]], b:[t[1],t[2]]};
+}
+function renderProximo(){
+  let h = "";
+  if(!matches.length){
+    h += '<p class="note" style="margin:0 0 10px">Para el primer partido elegid las parejas. Después se emparejan solos: 1º + 4º contra 2º + 3º.</p>';
+    PAIRINGS.forEach((pr,i)=>{ h += `<label class="opt"><input type="radio" name="pair" value="${i}" ${i==pairing?'checked':''}>${pr.map(t=>t.map(j=>P[j]).join(" + ")).join("  vs  ")}</label>`; });
+  } else {
+    h += '<p class="note" style="margin:0 0 10px">Por la clasificación actual: 1º + 4º contra 2º + 3º.</p>';
+  }
+  const pr = proposal();
+  h += `<div class="court"><div class="team">${pr.a.join("<br>")}</div><div class="vs">vs</div><div class="team">${pr.b.join("<br>")}</div></div>`;
+  $("proximo").innerHTML = h;
+  document.querySelectorAll('input[name=pair]').forEach(r=>r.onchange=()=>{ pairing=+r.value; renderProximo(); renderSets(); });
+}
+function renderSets(){
+  const pr = proposal();
+  let h = `<span></span><span class="hd">${pr.a.join(" + ")}</span><span class="hd">${pr.b.join(" + ")}</span>`;
+  for(let i=1;i<=3;i++) h += `<label for="s${i}a">Set ${i}${i==3?' (si hay)':''}</label><input id="s${i}a" type="number" min="0" max="20" inputmode="numeric"><input id="s${i}b" type="number" min="0" max="20" inputmode="numeric">`;
+  $("sets").innerHTML = h;
+}
+
+function fmtFecha(f){ const [y,m,d]=f.split("-"); return `${d}/${m}/${y}`; }
+function renderHist(){
+  if(!matches.length){ $("lista").innerHTML='<p class="note">Todavía no hay partidos registrados.</p>'; return; }
+  $("lista").innerHTML = [...matches].reverse().map((m,idx)=>{
+    const [a,b]=setsWon(m), n=matches.length-idx;
+    const ta=`<span class="${a>b?'win':''}">${m.a.join(" + ")}</span>`, tb=`<span class="${b>a?'win':''}">${m.b.join(" + ")}</span>`;
+    return `<div class="match"><div class="meta">Partido ${n} · ${fmtFecha(m.fecha)}</div>
+      <div>${ta} <span class="meta">vs</span> ${tb}</div>
+      <div class="score">${m.sets.map(s=>s[0]+"-"+s[1]).join(", ")}</div></div>`;
+  }).join("");
+}
+
+$("guardar").onclick = async ()=>{
+  const pr = proposal(), sets = [];
+  for(let i=1;i<=3;i++){
+    const a=$("s"+i+"a").value, b=$("s"+i+"b").value;
+    if(a===""&&b==="") continue;
+    if(a===""||b===""){ return err(`Completa los dos marcadores del set ${i}.`); }
+    if(+a===+b){ return err(`El set ${i} no puede acabar en empate.`); }
+    sets.push([+a,+b]);
+  }
+  if(sets.length<2) return err("Introduce al menos dos sets.");
+  const w = setsWon({sets}); 
+  if(sets.length==2 && w[0]!=2 && w[1]!=2) return err("Con un set para cada equipo hace falta el tercer set.");
+  if(sets.length==3 && (w[0]==0||w[1]==0)) return err("Si un equipo gana los dos primeros sets no hay tercer set.");
+  const fecha = $("fecha").value; if(!fecha) return err("Elige la fecha del partido.");
+  matches.push({a:pr.a,b:pr.b,sets,fecha}); err(""); pairing=0;
+  try{ await commit(); renderAll(); show("clas"); }catch(e){ matches.pop(); err("No se ha podido guardar: " + (e && e.message || "inténtalo de nuevo.")); }
+};
+function err(t){ $("err").textContent=t; }
+
+let armed=false;
+$("deshacer").onclick = async e=>{
+  if(!matches.length) return;
+  if(!armed){ armed=true; e.target.textContent="¿Seguro? Pulsa otra vez"; setTimeout(()=>{armed=false;e.target.textContent="Borrar último partido";},3500); return; }
+  const last=matches.pop(); armed=false; e.target.textContent="Borrar último partido";
+  try{ await commit(); renderAll(); }catch(x){ matches.push(last); renderAll(); }
+};
+
+function show(t){
+  ["clas","reg","hist"].forEach(id=>$(id).classList.toggle("hidden",id!==t));
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.tab));
+document.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".sec").forEach(x=>x.setAttribute("aria-selected",x===b));
+  $("padel").classList.toggle("hidden",b.dataset.sec!=="padel");
+  $("mesa").classList.toggle("hidden",b.dataset.sec!=="mesa");
+});
+function renderAll(){ renderTabla(); renderProximo(); renderSets(); renderHist(); $("fecha").value=new Date().toISOString().slice(0,10); }
+$("lnkEd").onclick=e=>{ e.preventDefault(); $("edBox").classList.toggle("hidden"); };
+$("tokOk").onclick=async()=>{
+  token=$("tok").value.trim(); $("tok").value="";
+  try{ localStorage.setItem("lp-token",token); }catch(e){}
+  if(await checkOwner()){ $("tokMsg").textContent="Modo editor activado en este navegador."; }
+  else { token=""; try{ localStorage.removeItem("lp-token"); }catch(e){} $("tokMsg").textContent="Ese token no sirve para este repositorio."; }
+};
+$("tokOut").onclick=()=>{ token=""; try{ localStorage.removeItem("lp-token"); }catch(e){} document.body.classList.remove("owner"); $("tokMsg").textContent="Has salido del modo editor."; };
+load();
+</script>
+</body>
+</html>
