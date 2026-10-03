@@ -1,1 +1,25 @@
-[]
+[
+ {
+  "fecha": "2026-10-03",
+  "juego": "Hilo",
+  "peso": 0.5,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 1
+   },
+   {
+    "p": "Fran",
+    "pos": 2
+   },
+   {
+    "p": "Danis",
+    "pos": 4
+   },
+   {
+    "p": "DanRain",
+    "pos": 3
+   }
+  ]
+ }
+]
