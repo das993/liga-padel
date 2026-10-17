@@ -44,5 +44,28 @@
     "pos": 2
    }
   ]
+ },
+ {
+  "fecha": "2026-10-17",
+  "juego": "Aventureros al tren",
+  "peso": 1,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 3
+   },
+   {
+    "p": "Fran",
+    "pos": 1
+   },
+   {
+    "p": "Danis",
+    "pos": 2
+   },
+   {
+    "p": "DanRain",
+    "pos": 4
+   }
+  ]
  }
 ]
