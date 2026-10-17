@@ -21,5 +21,28 @@
     "pos": 3
    }
   ]
+ },
+ {
+  "fecha": "2026-10-17",
+  "juego": "Colt Express",
+  "peso": 0.5,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 1
+   },
+   {
+    "p": "Fran",
+    "pos": 3
+   },
+   {
+    "p": "Danis",
+    "pos": 4
+   },
+   {
+    "p": "DanRain",
+    "pos": 2
+   }
+  ]
  }
 ]
