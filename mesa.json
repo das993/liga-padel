@@ -90,5 +90,28 @@
     "pos": 3
    }
   ]
+ },
+ {
+  "fecha": "2026-11-02",
+  "juego": "Pelusas",
+  "peso": 0.5,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 2
+   },
+   {
+    "p": "Fran",
+    "pos": 1
+   },
+   {
+    "p": "Danis",
+    "pos": 4
+   },
+   {
+    "p": "DanRain",
+    "pos": 3
+   }
+  ]
  }
 ]
