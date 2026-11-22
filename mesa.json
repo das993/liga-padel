@@ -136,5 +136,28 @@
     "pos": 4
    }
   ]
+ },
+ {
+  "fecha": "2026-11-22",
+  "juego": "Scrabble",
+  "peso": 1,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 3
+   },
+   {
+    "p": "Fran",
+    "pos": 2
+   },
+   {
+    "p": "Danis",
+    "pos": 1
+   },
+   {
+    "p": "DanRain",
+    "pos": 4
+   }
+  ]
  }
 ]
