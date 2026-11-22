@@ -159,5 +159,28 @@
     "pos": 4
    }
   ]
+ },
+ {
+  "fecha": "2026-11-22",
+  "juego": "Hilo",
+  "peso": 0.5,
+  "res": [
+   {
+    "p": "Darío",
+    "pos": 3
+   },
+   {
+    "p": "Fran",
+    "pos": 2
+   },
+   {
+    "p": "Danis",
+    "pos": 4
+   },
+   {
+    "p": "DanRain",
+    "pos": 1
+   }
+  ]
  }
 ]
